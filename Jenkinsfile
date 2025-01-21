@@ -1,4 +1,3 @@
-# Start Generation Here
 pipeline {
     agent any
 
