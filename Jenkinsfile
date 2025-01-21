@@ -1,12 +1,11 @@
 pipeline {
-    agent any
-
     stages {
         stage('Build') {
             steps {
                 script {
                     echo "빌드 작업을 대기 중입니다..."
-                    def version = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+                    // GitHub 프라이빗 레포지토리에서 최신 태그 가져오기
+                    def version = sh(script: 'git ls-remote --tags https://github.com/sesac-awscloud2-final-project-team2/test-aws-cicd.git | awk -F/ \'{print $3}\' | sort -V | tail -n1', returnStdout: true).trim()
                     def newVersion
                     
                     if (version) {
