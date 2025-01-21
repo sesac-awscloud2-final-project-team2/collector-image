@@ -5,6 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
+                    echo "빌드 작업을 대기 중입니다..."
                     def version = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
                     def newVersion
                     
@@ -16,6 +17,7 @@ pipeline {
                         newVersion = '0.1'
                     }
                     
+                    echo "Docker 이미지 빌드 중: collector/dev01:${newVersion}"
                     sh "docker image build --platform linux/amd64 -t collector/dev01:${newVersion} ."
                     sh "docker tag collector/dev01:${newVersion} 257394490626.dkr.ecr.ap-northeast-2.amazonaws.com/collector/dev01:${newVersion}"
                 }
@@ -24,6 +26,7 @@ pipeline {
         stage('Push to ECR') {
             steps {
                 script {
+                    echo "ECR에 푸시 중: collector/dev01:${newVersion}"
                     sh "docker push 257394490626.dkr.ecr.ap-northeast-2.amazonaws.com/collector/dev01:${newVersion}"
                 }
             }
