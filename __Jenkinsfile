@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = "ap-northeast-2"
+        SECRETS_NAME = "your-secrets-manager-secret-name"
+    }
+
+    stages {
+        stage('Retrieve Secrets') {
+            steps {
+                script {
+                    // AWS Secrets Manager에서 비밀 정보 가져오기
+                    def secrets = sh(script: """
+                        aws secretsmanager get-secret-value --secret-id ${SECRETS_NAME} --region ${AWS_DEFAULT_REGION} --query SecretString --output text
+                    """, returnStdout: true).trim()
+                    
+                    def secretsMap = readJSON text: secrets
+                    
+                    // 환경 변수 설정
+                    env.AWS_ACCOUNT_ID = secretsMap.AWS_ACCOUNT_ID
+                    env.IMAGE_REPO_NAME = secretsMap.IMAGE_REPO_NAME
+                    env.IMAGE_TAG = secretsMap.IMAGE_TAG
+                    env.REPOSITORY_URI = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${env.IMAGE_REPO_NAME}"
+                    env.ECR_ENDPOINT = "${env.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                }
+            }
+        }
+
+        stage('ECR Login') {
+            steps {
+                script {
+                    withAWS(region: "${AWS_DEFAULT_REGION}", credentials: 'aws-credentials-id') {
+                        sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${env.ECR_ENDPOINT}"
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo '도커 이미지 빌드를 시작합니다.'
+                    sh "docker image build --platform linux/amd64 -t ${env.IMAGE_REPO_NAME}:${env.IMAGE_TAG} ."
+                    echo '도커 이미지 빌드가 완료되었습니다.'
+                }
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                script {
+                    echo '도커 이미지에 태그를 추가합니다.'
+                    sh "docker tag ${env.IMAGE_REPO_NAME}:${env.IMAGE_TAG} ${env.REPOSITORY_URI}:${env.IMAGE_TAG}"
+                    echo '도커 이미지 태그 추가가 완료되었습니다.'
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                script {
+                    echo 'ECR에 도커 이미지를 업로드합니다.'
+                    sh "docker push ${env.REPOSITORY_URI}:${env.IMAGE_TAG}"
+                    echo 'ECR에 도커 이미지 업로드가 완료되었습니다.'
+                }
+            }
+        }
+    }
+}
