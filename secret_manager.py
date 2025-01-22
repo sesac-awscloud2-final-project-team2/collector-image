@@ -4,11 +4,11 @@
 # https://aws.amazon.com/developer/language/python/
 
 import boto3
+import json
 from botocore.exceptions import ClientError
 
 
 def get_secret():
-
     secret_name = "collector_to_dynamoDB"
     region_name = "ap-northeast-2"
 
@@ -20,12 +20,22 @@ def get_secret():
     )
 
     try:
-        secret = client.get_secret_value(
+        response = client.get_secret_value(
             SecretId=secret_name
         )
-    except ClientError as e:
-        # For a list of exceptions thrown, see
-        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-        raise e
 
-    return secret
+        # Check if SecretString is available
+        if 'SecretString' in response:
+            secret = response['SecretString']
+        else:
+            # If the secret is stored as binary, decode it
+            secret = response['SecretBinary'].decode('utf-8')
+        
+        # Parse the secret as JSON
+        secret_dict = json.loads(secret)
+        return secret_dict  # Return as a dictionary
+
+    except ClientError as e:
+        # Handle known exceptions
+        print(f"An error occurred: {e}")
+        raise e

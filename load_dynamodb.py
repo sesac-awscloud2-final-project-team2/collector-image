@@ -7,7 +7,7 @@ from secret_manager import get_secret
 
 secrets = get_secret()
 
-collector_port = secrets['COLLECTOR_PORT']
+collector_port = int(secrets.get("COLLECTOR_PORT", 30000)) # 기본값30000
 aws_access_key_id = secrets['DYNAMO_ACCESS_KEY_ID']
 aws_secret_access_key = secrets['DYNAMO_SECRET_ACCESS_KEY']
 region_name = secrets['DYNAMO_REGION']
