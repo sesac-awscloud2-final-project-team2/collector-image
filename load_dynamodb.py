@@ -3,14 +3,14 @@
 '''
 
 import boto3
-import os
-from dotenv import load_dotenv
+from secret_manager import get_secret
 
-load_dotenv()
+secrets = get_secret()
 
-aws_access_key_id = os.getenv('DYNAMO_ACCESS_KEY_ID')
-aws_secret_access_key = os.getenv('DYNAMO_SECRET_ACCESS_KEY')
-region_name = os.getenv('DYNAMO_REGION')
+collector_port = secrets['COLLECTOR_PORT']
+aws_access_key_id = secrets['DYNAMO_ACCESS_KEY_ID']
+aws_secret_access_key = secrets['DYNAMO_SECRET_ACCESS_KEY']
+region_name = secrets['DYNAMO_REGION']
 
 # DynamoDB 클라이언트 생성
 dynamodb_client = boto3.client(
