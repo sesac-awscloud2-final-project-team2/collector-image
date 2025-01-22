@@ -7,15 +7,13 @@ pipeline {
         IMAGE_REPO_NAME = "collector/dev01"
         IMAGE_TAG = "latest"
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-        CREDENTIAL_ID = 'AKIATX3PIHUBGGKLQA2F'
-        ACCESS_KEY_VARIABLE = 'dynamodb'
-        SECRET_ACCESS_KEY = '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'
+        CREDENTIAL_ID = 'ecr-credential'
     }
     stages {
         stage('ECR Login') {
             steps {
                 script {
-                    withCredentials([aws(credentialsId: "${CREDENTIAL_ID}", accessKeyVariable: "${ACCESS_KEY_VARIABLE}", secretKeyVariable: "${SECRET_ACCESS_KEY}")]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${CREDENTIAL_ID}"]]) {
                         sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
                     }
                 }
