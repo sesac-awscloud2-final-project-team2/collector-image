@@ -3,7 +3,7 @@
 '''
 
 import boto3
-from secret_manager import get_secret
+from secret_manager import get_secret 
 
 secrets = get_secret()
 
