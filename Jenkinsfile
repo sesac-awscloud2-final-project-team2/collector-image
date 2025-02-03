@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCOUNT_ID = "257394490626"
+        AWS_ACCOUNT_ID = "390844761387"
         AWS_DEFAULT_REGION = "ap-northeast-2"
-        IMAGE_REPO_NAME = "collector/dev01"
+        IMAGE_REPO_NAME = "collector"
         IMAGE_TAG = "latest"
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
         CREDENTIAL_ID = 'ecr-credential'

@@ -3,46 +3,115 @@
 '''
 
 import boto3
-from secret_manager import get_secret
 
-secrets = get_secret()
-
-collector_port = int(secrets.get("COLLECTOR_PORT", 30000)) # 기본값30000
-aws_access_key_id = secrets['DYNAMO_ACCESS_KEY_ID']
-aws_secret_access_key = secrets['DYNAMO_SECRET_ACCESS_KEY']
-region_name = secrets['DYNAMO_REGION']
+region_name = "ap-northeast-2"
 
 # DynamoDB 클라이언트 생성
 dynamodb_client = boto3.client(
     'dynamodb',
-    aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
     region_name=region_name
 )
 
-def save_dynamodb_table(data:str, table_name:str):
+class ValidData:
+    def __init__(self, data: dict, table_name: str) -> None:
+        self.data = data
+        self.table_name = table_name
+
+    def __call__(self) -> dict:
+        if self.table_name == "user":
+            result = {
+                'user_id': {'S': self.data['user_id']},
+                'username': {'S': self.data['username']},
+                'email': {'S': self.data['email']},
+                'password_hash': {'S': self.data['password_hash']},
+                'name': {'S': self.data['name']},
+                'gender': {'S': self.data['gender']},
+                'birth_date': {'S': self.data['birth_date']},
+                'nationality': {'S': self.data['nationality']},
+                'profile_image_url': {'S': self.data['profile_image_url']},
+                'preferred_language': {'S': self.data['preferred_language']},
+                'phone_number': {'S': self.data['phone_number']},
+                'is_verified': {'BOOL': self.data['is_verified']},
+                'created_at': {'S': self.data['created_at']},
+                'status': {'S': self.data['status']}
+            }
+        elif self.table_name == "trip":
+            result = {
+                'trip_id': {'S': self.data['trip_id']},
+                'user_id': {'S': self.data['user_id']},
+                'title': {'S': self.data['title']},
+                'start_date': {'S': self.data['start_date']},
+                'end_date': {'S': self.data['end_date']},
+                'description': {'S': self.data['description']},
+                'country': {'S': self.data['country']},
+                'region': {'S': self.data['region']},
+                'travel_type': {'S': self.data['travel_type']},
+                'budget': {'N': str(self.data['budget'])},
+                'transportation_type': {'S': self.data['transportation_type']},
+                'status': {'S': self.data['status']},
+                'privacy_level': {'S': self.data['privacy_level']},
+                'created_at': {'S': self.data['created_at']}
+            }
+        elif self.table_name == "experience":
+            result = {
+                'experience_id': {'S': self.data['experience_id']},
+                'user_id': {'S': self.data['user_id']},
+                'trip_id': {'S': self.data['trip_id']},
+                'experience_type': {'S': self.data['experience_type']},
+                'experience_name': {'S': self.data['experience_name']},
+                'rating': {'N': str(self.data['rating'])},
+                'review': {'S': self.data['review']},
+                'price': {'N': str(self.data['price'])},
+                'currency': {'S': self.data['currency']},
+                'experience_date': {'S': self.data['experience_date']},
+                'details': {
+                    'M': {
+                        'duration': {'S': self.data['details']['duration']},
+                        'crowd_level': {'S': self.data['details']['crowd_level']}
+                    }
+                },
+                'place': {
+                    'M': {
+                        'place_name': {'S': self.data['place']['place_name']},
+                        'address': {'S': self.data['place']['address']},
+                        'latitude': {'N': str(self.data['place']['latitude'])},
+                        'longitude': {'N': str(self.data['place']['longitude'])},
+                        'country': {'S': self.data['place']['country']},
+                        'city': {'S': self.data['place']['city']},
+                        'category': {'S': self.data['place']['category']},
+                        'accessibility': {'S': self.data['place']['accessibility']}
+                    }
+                },
+                'photo': {
+                    'M': {
+                        'file_name': {'S': self.data['photo']['file_name']},
+                        'file_path': {'S': self.data['photo']['file_path']},
+                        'file_size': {'N': str(self.data['photo']['file_size'])},
+                        'file_type': {'S': self.data['photo']['file_type']},
+                        'caption': {'S': self.data['photo']['caption']},
+                        'photo_latitude': {'N': str(self.data['photo']['photo_latitude'])},
+                        'photo_longitude': {'N': str(self.data['photo']['photo_longitude'])},
+                        'taken_at': {'S': self.data['photo']['taken_at']},
+                        'is_public': {'BOOL': self.data['photo']['is_public']}
+                    }
+                },
+                'created_at': {'S': self.data['created_at']}
+            }
+        else:
+            raise "Wrong Table Name"
+
+        return result
+
+
+def save_dynamodb_table(data:dict, table_name:str):
     """
     json string 형태의 data를 table_name을 이름으로 하는 테이블에 저장하는 함수
     """
     try:
+        valid_item = ValidData(data, table_name)
         response = dynamodb_client.put_item(
             TableName=table_name,
-            Item={
-                'user_id': {'S': data['user_id']},
-                'username': {'S': data['username']},
-                'email': {'S': data['email']},
-                'password_hash': {'S': data['password_hash']},
-                'name': {'S': data['name']},
-                'gender': {'S': data['gender']},
-                'birth_date': {'S': data['birth_date']},
-                'nationality': {'S': data['nationality']},
-                'profile_image_url': {'S': data['profile_image_url']},
-                'preferred_language': {'S': data['preferred_language']},
-                'phone_number': {'S': data['phone_number']},
-                'is_verified': {'BOOL': data['is_verified']},
-                'created_at': {'S': data['created_at']},
-                'status': {'S': data['status']}
-            }
+            Item=valid_item()
         )
         return {
             "statusCode": 200,
@@ -60,7 +129,7 @@ def save_dynamodb_table(data:str, table_name:str):
 if __name__ == "__main__":
     # 예시 데이터 생성
     example_data = {
-        'user_id': '12345',
+        'user_id': 'test',
         'username': 'test_user',
         'email': 'test@example.com',
         'password_hash': 'hashed_password',
@@ -76,4 +145,4 @@ if __name__ == "__main__":
         'status': 'active'
     }
     
-    save_dynamodb_table(example_data, "join")
+    save_dynamodb_table(example_data, "user")
