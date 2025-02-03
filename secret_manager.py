@@ -8,7 +8,7 @@ import json
 from botocore.exceptions import ClientError
 
 
-def get_secret():
+def get_secret(): 
     secret_name = "collector_to_dynamoDB"
     region_name = "ap-northeast-2"
 
