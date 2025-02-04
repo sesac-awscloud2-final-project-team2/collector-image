@@ -7,7 +7,7 @@ pipeline {
         IMAGE_REPO_NAME = "collector"
         IMAGE_TAG = "latest"
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-        CREDENTIAL_ID = 'ecr-credential'
+        CREDENTIAL_ID = 'ecr-credential' 
     }
     stages {
         stage('ECR Login') {
