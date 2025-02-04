@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from load_dynamodb import save_dynamodb_table, collector_port
+from load_dynamodb import save_dynamodb_table
 
 app = Flask(__name__)
 
