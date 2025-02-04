@@ -9,7 +9,7 @@ def join():
     
     # user_info를 데이터베이스에 저장
     try:
-        dynamo_save_result = save_dynamodb_table(user_info, 'join')
+        dynamo_save_result = save_dynamodb_table(user_info, 'user')
         return jsonify({"message": "User registered successfully", "user": dynamo_save_result}), 201
     
     except Exception as e:
