@@ -33,7 +33,7 @@ def experience():
     
     # experience_info를 데이터베이스에 저장 (+유효성 검사)
     try:
-        dynamo_save_result = save_dynamodb_table(experience_info, 'trip')
+        dynamo_save_result = save_dynamodb_table(experience_info, 'experience')
         return jsonify({"message": "Experience data save successfully", "user": dynamo_save_result}), 201
     
     except Exception as e:
