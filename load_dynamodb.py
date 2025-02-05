@@ -64,12 +64,7 @@ class ValidData:
                 'price': {'N': str(self.data['price'])},
                 'currency': {'S': self.data['currency']},
                 'experience_date': {'S': self.data['experience_date']},
-                'details': {
-                    'M': {
-                        'duration': {'S': self.data['details']['duration']},
-                        'crowd_level': {'S': self.data['details']['crowd_level']}
-                    }
-                },
+                'details': {'S': str(self.data['details'])},
                 'place': {
                     'M': {
                         'place_name': {'S': self.data['place']['place_name']},

@@ -5,8 +5,8 @@
 ```bash
 aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 390844761387.dkr.ecr.ap-northeast-2.amazonaws.com
 docker image build --platform linux/amd64 -t collector .
-docker tag collector:latest 390844761387.dkr.ecr.ap-northeast-2.amazonaws.com/collector:latest
-docker push 390844761387.dkr.ecr.ap-northeast-2.amazonaws.com/collector:latest
+docker tag collector:latest 390844761387.dkr.ecr.ap-northeast-2.amazonaws.com/collector:v1.0
+docker push 390844761387.dkr.ecr.ap-northeast-2.amazonaws.com/collector:v1.0
 ```
 
 ## (자동) Jenkins를 이용해 이미지 ECR 업로드
