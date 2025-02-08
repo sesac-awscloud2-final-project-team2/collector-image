@@ -114,9 +114,10 @@ pipeline {
                 sh """
                 git config user.email "jenkins@example.com"
                 git config user.name "Jenkins"
+                git remote add argo_repo https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git
                 git add .
                 git commit -m "Update ${IMAGE_REPO_NAME} image tag to ${IMAGE_TAG}"
-                git push origin main
+                git push argo_repo main
                 """
                 echo '수정된 ArgoCD repo main 브랜치로 push 되었습니다.'
             }
