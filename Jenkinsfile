@@ -112,6 +112,7 @@ pipeline {
         stage('Commit and Push Changes') {
             steps {
                 sh """
+                cd ${ARGO_GITHUB_REPO}
                 git config user.email "jenkins@example.com"
                 git config user.name "Jenkins"
                 git remote add argo_repo https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git
