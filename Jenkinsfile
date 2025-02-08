@@ -91,7 +91,15 @@ pipeline {
 
         stage('Update ArgoCD YAML') { 
             steps {
-                git url: "https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git"
+                script {
+                    // GITHUB_TOKEN을 사용하여 인증
+                    withCredentials([string(credentialsId: 'to-github-token', variable: 'GITHUB_TOKEN')]) {
+                        sh """
+                        git config --global credential.helper store
+                        echo "https://$GITHUB_TOKEN:@github.com" > ~/.git-credentials
+                        git clone https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git
+                        """
+                    }
                 sh """
                 sed -i 's|image: ${REPOSITORY_URI}:.*|image: ${REPOSITORY_URI}:${IMAGE_TAG}|' collector/collector-deployment.yaml
                 """
