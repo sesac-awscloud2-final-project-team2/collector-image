@@ -1,3 +1,35 @@
+def getNextEcrTag(String repositoryName, String region) {
+    def latestTag = sh(
+        script: """
+            aws ecr describe-images \
+                --repository-name ${repositoryName} \
+                --region ${region} \
+                --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' \
+                --output text
+        """,
+        returnStdout: true
+    ).trim()
+    
+    // v{major}.{minor} 형식인지 확인
+    def matcher = latestTag =~ /^v(\d+)\.(\d+)$/
+    if (matcher.matches()) {
+        def major = matcher[0][1].toInteger()
+        def minor = matcher[0][2].toInteger()
+        
+        // minor 버전을 1 증가
+        minor += 1
+        
+        // 새 태그 생성
+        def nextTag = "v${major}.${minor}"
+        return nextTag
+    } else {
+        // 형식이 맞지 않는 경우 에러 처리 또는 기본값 반환
+        echo "Warning: Latest tag is not in v{major}.{minor} format. Returning default value."
+        return "v0.1"
+    }
+}
+
+
 pipeline {
     agent any
 
@@ -5,9 +37,8 @@ pipeline {
         AWS_ACCOUNT_ID = "390844761387"
         AWS_DEFAULT_REGION = "ap-northeast-2"
         IMAGE_REPO_NAME = "collector"
-        IMAGE_TAG = "latest"
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-        CREDENTIAL_ID = 'ecr-credential'
+        CREDENTIAL_ID = 'ecr-credential' 
     }
     stages {
         stage('ECR Login') {
@@ -19,7 +50,14 @@ pipeline {
                 }
             }
         }
-
+        stage('Set Latest Tag') {
+            steps {
+                script {
+                    echo '도커 태그 마지막을 불러온 후 마이너 버전을 증가시킵니다.'
+                    env.IMAGE_TAG = getNextEcrTag(REPOSITORY_URI, AWS_DEFAULT_REGION)
+                }
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
