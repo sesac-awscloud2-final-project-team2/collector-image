@@ -1,8 +1,9 @@
 '''
 데이터를 테이블에 저장
 '''
-
 import boto3
+from ctl_logger import CostomLogger
+logger = CostomLogger("Collector")
 
 region_name = "ap-northeast-2"
 
@@ -102,19 +103,23 @@ def save_dynamodb_table(data:dict, table_name:str):
     """
     json string 형태의 data를 table_name을 이름으로 하는 테이블에 저장하는 함수
     """
+    start_time = logger.start('save_dynamodb_table')
     try:
         valid_item = ValidData(data, table_name)
+        
         response = dynamodb_client.put_item(
             TableName=table_name,
             Item=valid_item()
         )
+        logger.dynamodb_operation('put_item', table_name, 1, start_time)
+        logger.finish('save_dynamodb_table')
         return {
             "statusCode": 200,
             "message": "Data saved successfully",
             "response": response
         }
     except Exception as e:
-        print(f"Error querying items: {e}")
+        logger.error('Failed save_dynamo_table', e)
         return {
             "statusCode": 500,
             "message": "Error saving data",
