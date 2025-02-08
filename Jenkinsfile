@@ -93,7 +93,7 @@ pipeline {
             steps {
                 script {
                     // GITHUB_TOKEN을 사용하여 인증
-                    withCredentials([string(credentialsId: 'to-github-token', variable: 'GITHUB_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'from-github-token', variable: 'GITHUB_TOKEN')]) {
                         sh """
                         git config --global credential.helper store
                         echo "https://$GITHUB_TOKEN:@github.com" > ~/.git-credentials
