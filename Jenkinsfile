@@ -54,7 +54,7 @@ pipeline {
             steps {
                 script {
                     echo '도커 태그 마지막을 불러온 후 마이너 버전을 증가시킵니다.'
-                    env.IMAGE_TAG = getNextEcrTag(REPOSITORY_URI, AWS_DEFAULT_REGION)
+                    env.IMAGE_TAG = getNextEcrTag(IMAGE_REPO_NAME, AWS_DEFAULT_REGION)
                 }
             }
         }
