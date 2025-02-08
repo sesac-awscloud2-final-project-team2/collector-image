@@ -91,7 +91,7 @@ pipeline {
 
         stage('Update ArgoCD YAML') {
             steps {
-                git url: "https://github.com/${ARGO_GITHUB_REPO}.git"
+                git url: "https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git"
                 sh """
                 sed -i 's|image: ${REPOSITORY_URI}:.*|image: ${REPOSITORY_URI}:${IMAGE_TAG}|' collector/collector-deployment.yaml
                 """
