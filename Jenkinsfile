@@ -38,7 +38,8 @@ pipeline {
         AWS_DEFAULT_REGION = "ap-northeast-2"
         IMAGE_REPO_NAME = "collector"
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-        CREDENTIAL_ID = 'ecr-credential' 
+        CREDENTIAL_ID = "ecr-credential"
+        ARGO_GITHUB_REPO = "aws-argocd"
     }
     stages {
         stage('ECR Login') {
@@ -54,7 +55,7 @@ pipeline {
             steps {
                 script {
                     echo '도커 태그 마지막을 불러온 후 마이너 버전을 증가시킵니다.'
-                    env.IMAGE_TAG = getNextEcrTag(REPOSITORY_URI, AWS_DEFAULT_REGION)
+                    env.IMAGE_TAG = getNextEcrTag(IMAGE_REPO_NAME, AWS_DEFAULT_REGION)
                 }
             }
         }
@@ -87,5 +88,29 @@ pipeline {
                 }
             }
         }
+
+        stage('Update ArgoCD YAML') { 
+            steps {
+                git url: "https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git"
+                sh """
+                sed -i 's|image: ${REPOSITORY_URI}:.*|image: ${REPOSITORY_URI}:${IMAGE_TAG}|' collector/collector-deployment.yaml
+                """
+                echo 'ArgoCD repo에 있는 YAML 파일 태그가 수정되었습니다.'
+            }
+        }
+
+        stage('Commit and Push Changes') {
+            steps {
+                sh """
+                git config user.email "jenkins@example.com"
+                git config user.name "Jenkins"
+                git add .
+                git commit -m "Update ${IMAGE_REPO_NAME} image tag to ${IMAGE_TAG}"
+                git push origin main
+                """
+                echo '수정된 ArgoCD repo main 브랜치로 push 되었습니다.'
+            }
+        }
+
     }
 }
