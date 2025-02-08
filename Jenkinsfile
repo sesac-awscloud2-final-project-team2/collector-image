@@ -89,7 +89,7 @@ pipeline {
             }
         }
 
-        stage('Update ArgoCD YAML') {
+        stage('Update ArgoCD YAML') { 
             steps {
                 git url: "https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git"
                 sh """
