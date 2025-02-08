@@ -100,6 +100,7 @@ pipeline {
                         git clone https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git
                         """
                     }
+                }
                 sh """
                 sed -i 's|image: ${REPOSITORY_URI}:.*|image: ${REPOSITORY_URI}:${IMAGE_TAG}|' collector/collector-deployment.yaml
                 """
