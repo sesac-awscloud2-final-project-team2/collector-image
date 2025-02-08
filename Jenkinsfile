@@ -91,6 +91,7 @@ pipeline {
 
         stage('Update ArgoCD YAML') { 
             steps {
+                sh "rm -rf ${ARGO_GITHUB_REPO}"
                 script {
                     // GITHUB_TOKEN을 사용하여 인증
                     withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
