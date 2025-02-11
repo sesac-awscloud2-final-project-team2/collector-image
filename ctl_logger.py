@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-class CostomLogger:
+class CustomLogger:
     def __init__(self, name):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)

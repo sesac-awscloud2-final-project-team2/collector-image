@@ -2,8 +2,8 @@
 데이터를 테이블에 저장
 '''
 import boto3
-from ctl_logger import CostomLogger
-logger = CostomLogger("Collector")
+from ctl_logger import CustomLogger
+logger = CustomLogger("Collector")
 
 region_name = "ap-northeast-2"
 
