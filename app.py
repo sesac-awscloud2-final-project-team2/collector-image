@@ -7,6 +7,7 @@ from load_dynamodb import save_dynamodb_table
 
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
+# metrics.info('app_info', 'Application info', version='1.0')
 
 # 요청 횟수를 측정하는 Counter 정의
 request_counter = Counter(
