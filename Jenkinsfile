@@ -91,9 +91,19 @@ pipeline {
 
         stage('Update ArgoCD YAML') { 
             steps {
-                git url: "https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git"
+                sh "rm -rf ${ARGO_GITHUB_REPO}"
+                script {
+                    // GITHUB_TOKEN을 사용하여 인증
+                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                        sh """
+                        git config --global credential.helper store
+                        echo "https://$GITHUB_TOKEN:@github.com" > ~/.git-credentials
+                        git clone https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git
+                        """
+                    }
+                }
                 sh """
-                sed -i 's|image: ${REPOSITORY_URI}:.*|image: ${REPOSITORY_URI}:${IMAGE_TAG}|' collector/collector-deployment.yaml
+                sed -i 's|image: ${REPOSITORY_URI}:.*|image: ${REPOSITORY_URI}:${IMAGE_TAG}|' ${ARGO_GITHUB_REPO}/collector/collector-deployment.yaml
                 """
                 echo 'ArgoCD repo에 있는 YAML 파일 태그가 수정되었습니다.'
             }
@@ -102,11 +112,13 @@ pipeline {
         stage('Commit and Push Changes') {
             steps {
                 sh """
+                cd ${ARGO_GITHUB_REPO}
                 git config user.email "jenkins@example.com"
                 git config user.name "Jenkins"
+                git remote add argo_repo https://github.com/sesac-awscloud2-final-project-team2/${ARGO_GITHUB_REPO}.git
                 git add .
                 git commit -m "Update ${IMAGE_REPO_NAME} image tag to ${IMAGE_TAG}"
-                git push origin main
+                git push argo_repo main
                 """
                 echo '수정된 ArgoCD repo main 브랜치로 push 되었습니다.'
             }
